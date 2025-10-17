@@ -6,7 +6,7 @@ REM ------------------------------------------------------------------------
 REM Définition des chemins (à adapter si besoin)
 set "FRAMEWORK_DIR=G:\ITU\S5\WEBSERVICE\Framework"
 set "BUILD_DIR=%FRAMEWORK_DIR%\build"
-set "TEST_DIR=G:\ITU\S5\WEBSERVICE\
+set "TEST_DIR=G:\ITU\S5\WEBSERVICE\Test_Framework
 set "SERVLET_JAR=%FRAMEWORK_DIR%\jakarta.servlet-api_5.0.0.jar"
 
 REM Création des dossiers de sortie du framework
