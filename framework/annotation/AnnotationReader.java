@@ -17,6 +17,7 @@ public class AnnotationReader {
     
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public static void readGetMappingAnnotations(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
         
@@ -29,6 +30,8 @@ public class AnnotationReader {
         }
     }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     // Dépendances (Dependency Injection)
@@ -151,6 +154,9 @@ public class AnnotationReader {
         }
     }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
