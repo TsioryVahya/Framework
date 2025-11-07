@@ -16,6 +16,7 @@ import framework.utilitaire.MappingInfo;
 public class AnnotationReader {
     
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public static void readGetMappingAnnotations(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
         
@@ -28,6 +29,8 @@ public class AnnotationReader {
         }
     }
 =======
+=======
+>>>>>>> Stashed changes
     // Dépendances (Dependency Injection)
     private static final ConfigLoader configLoader = new ConfigLoader();
     private static final ClassScanner classScanner = new ClassScanner();
@@ -147,5 +150,8 @@ public class AnnotationReader {
             System.out.println("404 - URL non trouvée: " + url);
         }
     }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
