@@ -100,7 +100,7 @@ echo.
 pause
 
 REM Étape 8: Déploiement automatique vers Tomcat (copie dans webapps)
-set "TOMCAT_WEBAPPS=D:\Pxampp\tomcat\webapps"
+set "TOMCAT_WEBAPPS=D:\xampp\tomcat\webapps"
 echo.
 echo 8. Déploiement vers %TOMCAT_WEBAPPS% ...
 
