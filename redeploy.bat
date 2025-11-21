@@ -59,11 +59,11 @@ copy "testFramework\resources\config.properties" "testFramework\WEB-INF\classes\
 REM Compiler les modèles (domaines)
 javac -classpath "build\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\model\*.java
 
-REM Compiler les controllers de test (avec dépendance sur les modèles)
-javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\controller\*.java
-javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\admin\*.java
-javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\util\*.java
-javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\Main.java
+REM Compiler les controllers de test (ajout du servlet API pour HttpServletRequest)
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\controller\*.java
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\admin\*.java
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\util\*.java
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\Main.java
 
 if errorlevel 1 (
     echo ERREUR: Échec de la compilation des classes de test!
