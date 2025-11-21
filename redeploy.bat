@@ -25,6 +25,7 @@ javac -classpath "build\classes" -d "build\classes" framework\utilitaire\Mapping
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ConfigLoader.java
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ClassScanner.java
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\UrlMappingRegistry.java
+javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ModelAndView.java
 
 REM Compiler le service principal qui dépend des utilitaires
 javac -classpath "build\classes" -d "build\classes" framework\annotation\AnnotationReader.java
@@ -55,8 +56,11 @@ if not exist "testFramework\WEB-INF\classes" mkdir "testFramework\WEB-INF\classe
 REM Copier config.properties
 copy "testFramework\resources\config.properties" "testFramework\WEB-INF\classes\"
 
-REM Compiler les controllers de test
-javac -classpath "build\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\controller\*.java
+REM Compiler les modèles (domaines)
+javac -classpath "build\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\model\*.java
+
+REM Compiler les controllers de test (avec dépendance sur les modèles)
+javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\controller\*.java
 javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\admin\*.java
 javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\util\*.java
 javac -classpath "build\classes;testFramework\WEB-INF\classes" -d "testFramework\WEB-INF\classes" testFramework\com\testframework\Main.java
