@@ -9,6 +9,7 @@ import java.util.Map;
 
 import framework.annotation.AnnotationReader;
 import framework.utilitaire.MappingInfo;
+import framework.utilitaire.ModelAndView;
 
 public class FrontServlet extends HttpServlet {
 
@@ -73,6 +74,15 @@ public class FrontServlet extends HttpServlet {
 
             if (result instanceof String) {
                 resp.getWriter().write((String) result);
+            } else if (result instanceof ModelAndView) {
+                ModelAndView mv = (ModelAndView) result;
+                // Set model attributes
+                for (java.util.Map.Entry<String, Object> entry : mv.getModel().entrySet()) {
+                    req.setAttribute(entry.getKey(), entry.getValue());
+                }
+                // Forward to JSP view
+                RequestDispatcher dispatcher = req.getRequestDispatcher(mv.getView());
+                dispatcher.forward(req, resp);
             } else if (result == null) {
                 resp.getWriter().write("");
             } else {
