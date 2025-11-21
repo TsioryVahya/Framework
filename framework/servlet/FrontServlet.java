@@ -4,6 +4,8 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Map;
 
 import framework.annotation.AnnotationReader;
 import framework.utilitaire.MappingInfo;
@@ -14,18 +16,17 @@ public class FrontServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        // Initialize annotation-based URL mappings once at startup
         AnnotationReader.init();
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) 
+    protected void service(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String originalURI = (String) req.getAttribute("originalURI");
         String requestURI = originalURI != null ? originalURI : req.getRequestURI();
         String contextPath = req.getContextPath();
-        String urlPath = requestURI.startsWith(contextPath) 
-                ? requestURI.substring(contextPath.length()) 
+        String urlPath = requestURI.startsWith(contextPath)
+                ? requestURI.substring(contextPath.length())
                 : requestURI;
         if (urlPath.isEmpty()) {
             urlPath = "/";
@@ -33,9 +34,7 @@ public class FrontServlet extends HttpServlet {
 
         System.out.println("FrontServlet handling: " + urlPath);
 
-        // Find mapping for the URL
         MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath);
-
         resp.setContentType("text/html;charset=UTF-8");
 
         if (mapping == null || !mapping.isFound()) {
@@ -45,11 +44,33 @@ public class FrontServlet extends HttpServlet {
         }
 
         try {
+            // Expose path variables (if any) as request attributes
+            Map<String, String> vars = mapping.getLastPathVariables();
+            if (vars != null) {
+                for (Map.Entry<String, String> e : vars.entrySet()) {
+                    req.setAttribute(e.getKey(), e.getValue());
+                }
+            }
+
             Class<?> controllerClass = mapping.getControllerClass();
             Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
             Method method = mapping.getMethod();
 
-            Object result = method.invoke(controllerInstance);
+            // Build method arguments: support HttpServletRequest/HttpServletResponse
+            Parameter[] params = method.getParameters();
+            Object[] args = new Object[params.length];
+            for (int i = 0; i < params.length; i++) {
+                Class<?> pt = params[i].getType();
+                if (HttpServletRequest.class.isAssignableFrom(pt)) {
+                    args[i] = req;
+                } else if (HttpServletResponse.class.isAssignableFrom(pt)) {
+                    args[i] = resp;
+                } else {
+                    args[i] = null;
+                }
+            }
+
+            Object result = method.invoke(controllerInstance, args);
 
             if (result instanceof String) {
                 resp.getWriter().write((String) result);
