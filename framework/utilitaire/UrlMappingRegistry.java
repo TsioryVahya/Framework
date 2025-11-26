@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * Responsable de la gestion du registre des mappings URL -> Classe/Méthode
@@ -59,7 +60,6 @@ public class UrlMappingRegistry {
      * @return MappingInfo ou null si non trouvé
      */
     public MappingInfo findByUrl(String url) {
-<<<<<<< HEAD
         // 1) Tentative de correspondance exacte (rapide)
         MappingInfo exact = urlMappings.get(url);
         if (exact != null) return exact;
@@ -72,9 +72,6 @@ public class UrlMappingRegistry {
             }
         }
         return null;
-=======
-        return urlMappings.get(url);
->>>>>>> main
     }
     
     /**
