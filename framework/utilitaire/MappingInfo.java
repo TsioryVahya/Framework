@@ -1,21 +1,23 @@
 package framework.utilitaire;
 
 import java.lang.reflect.Method;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MappingInfo {
     private Class<?> controllerClass;
     private Method method;
     private String url;
     private boolean found;
-    // Pattern support
     private boolean isPattern;
     private Pattern regex;
     private List<String> variableNames;
     private Map<String, String> lastPathVariables;
-    
+
     public MappingInfo(Class<?> controllerClass, Method method, String url) {
         this.controllerClass = controllerClass;
         this.method = method;
@@ -25,48 +27,61 @@ public class MappingInfo {
         this.lastPathVariables = new HashMap<>();
         compilePatternIfNeeded();
     }
-    
+
     public MappingInfo() {
         this.found = false;
+        this.variableNames = new ArrayList<>();
+        this.lastPathVariables = new HashMap<>();
     }
-    
+
     public Class<?> getControllerClass() {
         return controllerClass;
     }
-    
+
     public Method getMethod() {
         return method;
     }
-    
+
     public String getUrl() {
         return url;
     }
-    
+
     public boolean isFound() {
         return found;
     }
-    
+
     public String getClassName() {
         return found ? controllerClass.getSimpleName() : null;
     }
-    
+
     public String getMethodName() {
         return found ? method.getName() : null;
     }
 
     private void compilePatternIfNeeded() {
-        if (url != null && url.contains("{")) {
+        if (url != null && (url.contains("{") || url.contains("{{"))) {
             isPattern = true;
-            // Convert "/book/{id}" to regex like ^/book/([^/]+)$ and collect ["id"]
             StringBuilder regexBuilder = new StringBuilder("^");
             StringBuilder name = new StringBuilder();
             boolean inVar = false;
+            boolean doubleCurly = false;
             for (int i = 0; i < url.length(); i++) {
                 char c = url.charAt(i);
-                if (c == '{') {
+                if (!inVar && c == '{') {
+                    if (i + 1 < url.length() && url.charAt(i + 1) == '{') {
+                        doubleCurly = true;
+                        i++; 
+                    } else {
+                        doubleCurly = false;
+                    }
                     inVar = true;
                     name.setLength(0);
-                } else if (c == '}' && inVar) {
+                } else if (inVar && c == '}') {
+                    if (doubleCurly) {
+                        if (i + 1 < url.length() && url.charAt(i + 1) == '}') {
+                            i++; 
+                        }
+                    }
                     inVar = false;
                     variableNames.add(name.toString());
                     regexBuilder.append("([^/]+)");
@@ -74,7 +89,6 @@ public class MappingInfo {
                     if (inVar) {
                         name.append(c);
                     } else {
-                        // escape regex special chars minimally
                         if (".[]()\\+^$|".indexOf(c) >= 0) {
                             regexBuilder.append('\\');
                         }

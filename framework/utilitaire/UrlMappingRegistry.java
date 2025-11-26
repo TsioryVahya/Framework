@@ -42,7 +42,9 @@ public class UrlMappingRegistry {
                 if (method.isAnnotationPresent(GetMapping.class)) {
                     GetMapping mapping = method.getAnnotation(GetMapping.class);
                     String url = mapping.value();
-                    urlMappings.put(url, new MappingInfo(clazz, method, url));
+                    MappingInfo mi = new MappingInfo(clazz, method, url);
+                    urlMappings.put(url, mi);
+                    System.out.println("[UrlMappingRegistry] Registered: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
                     urlCount++;
                 }
             }
@@ -58,13 +60,14 @@ public class UrlMappingRegistry {
      * @return MappingInfo ou null si non trouvé
      */
     public MappingInfo findByUrl(String url) {
-        // 1) Exact match fast-path
+        // 1) Tentative de correspondance exacte (rapide)
         MappingInfo exact = urlMappings.get(url);
         if (exact != null) return exact;
-        // 2) Try pattern matches like /book/{id}
+        // 2) Parcours de tous les mappings pour les motifs avec variables de chemin
         Collection<MappingInfo> all = urlMappings.values();
         for (MappingInfo mi : all) {
             if (mi.matches(url)) {
+                System.out.println("[UrlMappingRegistry] Pattern match: " + mi.getUrl() + " ~ " + url);
                 return mi;
             }
         }

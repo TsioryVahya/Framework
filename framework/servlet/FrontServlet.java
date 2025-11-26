@@ -16,17 +16,18 @@ public class FrontServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        // Initialize annotation-based URL mappings once at startup
         AnnotationReader.init();
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp)
+    protected void service(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
         String originalURI = (String) req.getAttribute("originalURI");
         String requestURI = originalURI != null ? originalURI : req.getRequestURI();
         String contextPath = req.getContextPath();
-        String urlPath = requestURI.startsWith(contextPath)
-                ? requestURI.substring(contextPath.length())
+        String urlPath = requestURI.startsWith(contextPath) 
+                ? requestURI.substring(contextPath.length()) 
                 : requestURI;
         if (urlPath.isEmpty()) {
             urlPath = "/";
@@ -34,7 +35,9 @@ public class FrontServlet extends HttpServlet {
 
         System.out.println("FrontServlet handling: " + urlPath);
 
+        // Find mapping for the URL
         MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath);
+
         resp.setContentType("text/html;charset=UTF-8");
 
         if (mapping == null || !mapping.isFound()) {
@@ -66,6 +69,7 @@ public class FrontServlet extends HttpServlet {
                 } else if (HttpServletResponse.class.isAssignableFrom(pt)) {
                     args[i] = resp;
                 } else {
+                    // Unsupported parameter type; pass null for now
                     args[i] = null;
                 }
             }
@@ -77,7 +81,7 @@ public class FrontServlet extends HttpServlet {
             } else if (result instanceof ModelAndView) {
                 ModelAndView mv = (ModelAndView) result;
                 // Set model attributes
-                for (java.util.Map.Entry<String, Object> entry : mv.getModel().entrySet()) {
+                for (Map.Entry<String, Object> entry : mv.getModel().entrySet()) {
                     req.setAttribute(entry.getKey(), entry.getValue());
                 }
                 // Forward to JSP view
