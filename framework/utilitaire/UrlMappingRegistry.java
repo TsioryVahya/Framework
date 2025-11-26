@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * Responsable de la gestion du registre des mappings URL -> Classe/Méthode
@@ -41,7 +42,9 @@ public class UrlMappingRegistry {
                 if (method.isAnnotationPresent(GetMapping.class)) {
                     GetMapping mapping = method.getAnnotation(GetMapping.class);
                     String url = mapping.value();
-                    urlMappings.put(url, new MappingInfo(clazz, method, url));
+                    MappingInfo mi = new MappingInfo(clazz, method, url);
+                    urlMappings.put(url, mi);
+                    System.out.println("[UrlMappingRegistry] Registered: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
                     urlCount++;
                 }
             }
@@ -57,7 +60,18 @@ public class UrlMappingRegistry {
      * @return MappingInfo ou null si non trouvé
      */
     public MappingInfo findByUrl(String url) {
-        return urlMappings.get(url);
+        // 1) Tentative de correspondance exacte (rapide)
+        MappingInfo exact = urlMappings.get(url);
+        if (exact != null) return exact;
+        // 2) Parcours de tous les mappings pour les motifs avec variables de chemin
+        Collection<MappingInfo> all = urlMappings.values();
+        for (MappingInfo mi : all) {
+            if (mi.matches(url)) {
+                System.out.println("[UrlMappingRegistry] Pattern match: " + mi.getUrl() + " ~ " + url);
+                return mi;
+            }
+        }
+        return null;
     }
     
     /**
