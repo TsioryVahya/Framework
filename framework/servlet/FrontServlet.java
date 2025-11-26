@@ -72,7 +72,7 @@ public class FrontServlet extends HttpServlet {
             } else if (result instanceof ModelAndView) {
                 ModelAndView mv = (ModelAndView) result;
                 // Set model attributes
-                for (java.util.Map.Entry<String, Object> entry : mv.getModel().entrySet()) {
+                for (Map.Entry<String, Object> entry : mv.getModel().entrySet()) {
                     req.setAttribute(entry.getKey(), entry.getValue());
                 }
                 // Forward to JSP view
