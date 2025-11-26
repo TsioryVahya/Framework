@@ -1,11 +1,14 @@
 package framework.utilitaire;
 
 import framework.annotation.GetMapping;
+import framework.annotation.PostMapping;
+import framework.annotation.SimpleMapping;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.List;
+import java.util.Collection;
 
 /**
  * Responsable de la gestion du registre des mappings URL -> Classe/Méthode
@@ -13,11 +16,11 @@ import java.util.List;
  */
 public class UrlMappingRegistry {
     
-    private Map<String, MappingInfo> urlMappings;
+    private List<MappingInfo> urlMappings;
     private boolean initialized;
     
     public UrlMappingRegistry() {
-        this.urlMappings = new HashMap<>();
+        this.urlMappings = new ArrayList<>();
         this.initialized = false;
     }
     
@@ -41,9 +44,25 @@ public class UrlMappingRegistry {
                 if (method.isAnnotationPresent(GetMapping.class)) {
                     GetMapping mapping = method.getAnnotation(GetMapping.class);
                     String url = mapping.value();
-                    MappingInfo mi = new MappingInfo(clazz, method, url);
-                    urlMappings.put(url, mi);
-                    System.out.println("[UrlMappingRegistry] Registered: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
+                    MappingInfo mi = new MappingInfo(clazz, method, url, "GET");
+                    urlMappings.add(mi);
+                    System.out.println("[UrlMappingRegistry] Registered GET: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
+                    urlCount++;
+                }
+                if (method.isAnnotationPresent(PostMapping.class)) {
+                    PostMapping mapping = method.getAnnotation(PostMapping.class);
+                    String url = mapping.value();
+                    MappingInfo mi = new MappingInfo(clazz, method, url, "POST");
+                    urlMappings.add(mi);
+                    System.out.println("[UrlMappingRegistry] Registered POST: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
+                    urlCount++;
+                }
+                if (method.isAnnotationPresent(SimpleMapping.class)) {
+                    SimpleMapping mapping = method.getAnnotation(SimpleMapping.class);
+                    String url = mapping.value();
+                    MappingInfo mi = new MappingInfo(clazz, method, url, "ANY");
+                    urlMappings.add(mi);
+                    System.out.println("[UrlMappingRegistry] Registered SIMPLE: " + url + " -> " + clazz.getSimpleName() + "." + method.getName());
                     urlCount++;
                 }
             }
@@ -56,25 +75,21 @@ public class UrlMappingRegistry {
     /**
      * Recherche un mapping par URL
      * @param url L'URL à rechercher
+     * @param httpMethod Méthode HTTP (GET/POST)
      * @return MappingInfo ou null si non trouvé
      */
-    public MappingInfo findByUrl(String url) {
-<<<<<<< HEAD
-        // 1) Tentative de correspondance exacte (rapide)
-        MappingInfo exact = urlMappings.get(url);
-        if (exact != null) return exact;
-        // 2) Parcours de tous les mappings pour les motifs avec variables de chemin
-        Collection<MappingInfo> all = urlMappings.values();
-        for (MappingInfo mi : all) {
+    public MappingInfo findByUrl(String url, String httpMethod) {
+        // Parcours de tous les mappings pour matcher URL + méthode HTTP
+        for (MappingInfo mi : urlMappings) {
             if (mi.matches(url)) {
-                System.out.println("[UrlMappingRegistry] Pattern match: " + mi.getUrl() + " ~ " + url);
-                return mi;
+                String allowed = mi.getHttpMethod();
+                if ("ANY".equals(allowed) || allowed.equalsIgnoreCase(httpMethod)) {
+                    System.out.println("[UrlMappingRegistry] Match: [" + httpMethod + "] " + mi.getUrl() + " ~ " + url);
+                    return mi;
+                }
             }
         }
         return null;
-=======
-        return urlMappings.get(url);
->>>>>>> main
     }
     
     /**
@@ -91,3 +106,4 @@ public class UrlMappingRegistry {
         return urlMappings.size();
     }
 }
+

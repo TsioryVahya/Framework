@@ -1,35 +1,33 @@
 package framework.utilitaire;
 
 import java.lang.reflect.Method;
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-=======
->>>>>>> main
 
 public class MappingInfo {
     private Class<?> controllerClass;
     private Method method;
     private String url;
+    private String httpMethod; // "GET", "POST", or "ANY"
     private boolean found;
-<<<<<<< HEAD
     private boolean isPattern;
     private Pattern regex;
     private List<String> variableNames;
     private Map<String, String> lastPathVariables;
 
-=======
-    
->>>>>>> main
-    public MappingInfo(Class<?> controllerClass, Method method, String url) {
+    public MappingInfo(Class<?> controllerClass, Method method, String url, String httpMethod) {
         this.controllerClass = controllerClass;
         this.method = method;
         this.url = url;
+        this.httpMethod = httpMethod;
         this.found = true;
+        this.variableNames = new ArrayList<>();
+        this.lastPathVariables = new HashMap<>();
+        compilePatternIfNeeded();
     }
 
     public MappingInfo() {
@@ -50,6 +48,10 @@ public class MappingInfo {
         return url;
     }
 
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
     public boolean isFound() {
         return found;
     }
@@ -61,7 +63,6 @@ public class MappingInfo {
     public String getMethodName() {
         return found ? method.getName() : null;
     }
-<<<<<<< HEAD
 
     private void compilePatternIfNeeded() {
         if (url != null && (url.contains("{") || url.contains("{{"))) {
@@ -124,6 +125,4 @@ public class MappingInfo {
     public Map<String, String> getLastPathVariables() {
         return lastPathVariables;
     }
-=======
->>>>>>> main
 }
