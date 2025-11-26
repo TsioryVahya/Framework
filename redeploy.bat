@@ -17,7 +17,7 @@ REM Étape 3: Compilation
 echo 3. Compilation des sources du framework...
 
 REM Compiler les annotations de base
-javac -d "build\classes" framework\annotation\Controller.java framework\annotation\GetMapping.java framework\annotation\Param.java
+javac -d "build\classes" framework\annotation\Controller.java framework\annotation\GetMapping.java framework\annotation\Param.java framework\annotation\PostMapping.java framework\annotation\SimpleMapping.java
 
 REM Compiler les classes utilitaires (nouveau package framework\utilitaire)
 REM IMPORTANT: compiler MappingInfo AVANT UrlMappingRegistry

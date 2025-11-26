@@ -12,16 +12,18 @@ public class MappingInfo {
     private Class<?> controllerClass;
     private Method method;
     private String url;
+    private String httpMethod; // "GET", "POST", or "ANY"
     private boolean found;
     private boolean isPattern;
     private Pattern regex;
     private List<String> variableNames;
     private Map<String, String> lastPathVariables;
 
-    public MappingInfo(Class<?> controllerClass, Method method, String url) {
+    public MappingInfo(Class<?> controllerClass, Method method, String url, String httpMethod) {
         this.controllerClass = controllerClass;
         this.method = method;
         this.url = url;
+        this.httpMethod = httpMethod;
         this.found = true;
         this.variableNames = new ArrayList<>();
         this.lastPathVariables = new HashMap<>();
@@ -44,6 +46,10 @@ public class MappingInfo {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
     }
 
     public boolean isFound() {

@@ -35,7 +35,9 @@ public class AnnotationReader {
             Method[] methods = clazz.getDeclaredMethods();
             
             for (Method method : methods) {
-                if (method.isAnnotationPresent(GetMapping.class)) {
+                if (method.isAnnotationPresent(GetMapping.class)
+                        || method.isAnnotationPresent(PostMapping.class)
+                        || method.isAnnotationPresent(SimpleMapping.class)) {
                     classesWithAnnotations.add(clazz);
                     break;
                 }
@@ -62,7 +64,7 @@ public class AnnotationReader {
         
         List<Class<?>> annotatedClasses = findClassesWithMethodAnnotations(classes);
         
-        System.out.println("Classes utilisant l'annotation @GetMapping au niveau méthode:");
+        System.out.println("Classes utilisant les annotations @GetMapping/@PostMapping/@SimpleMapping au niveau méthode:");
         for (Class<?> clazz : annotatedClasses) {
             System.out.println("- " + clazz.getSimpleName());
             
@@ -71,12 +73,20 @@ public class AnnotationReader {
                 System.out.println("  └─ Annotée avec @Controller");
             }
             
-            // Lister les méthodes avec @GetMapping
+            // Lister les méthodes avec @GetMapping/@PostMapping/@SimpleMapping
             Method[] methods = clazz.getDeclaredMethods();
             for (Method method : methods) {
                 if (method.isAnnotationPresent(GetMapping.class)) {
                     GetMapping mapping = method.getAnnotation(GetMapping.class);
-                    System.out.println("  └─ Méthode: " + method.getName() + " -> " + mapping.value());
+                    System.out.println("  └─ [GET] Méthode: " + method.getName() + " -> " + mapping.value());
+                }
+                if (method.isAnnotationPresent(PostMapping.class)) {
+                    PostMapping mapping = method.getAnnotation(PostMapping.class);
+                    System.out.println("  └─ [POST] Méthode: " + method.getName() + " -> " + mapping.value());
+                }
+                if (method.isAnnotationPresent(SimpleMapping.class)) {
+                    SimpleMapping mapping = method.getAnnotation(SimpleMapping.class);
+                    System.out.println("  └─ [ANY] Méthode: " + method.getName() + " -> " + mapping.value());
                 }
             }
         }
@@ -117,13 +127,24 @@ public class AnnotationReader {
             init();
         }
         
-        MappingInfo info = urlRegistry.findByUrl(url);
+        MappingInfo info = urlRegistry.findByUrl(url, "GET");
+        return info != null ? info : new MappingInfo();
+    }
+
+    /**
+     * Recherche une URL en tenant compte de la méthode HTTP
+     */
+    public static MappingInfo findMappingByUrl(String url, String httpMethod) {
+        if (!urlRegistry.isInitialized()) {
+            System.out.println("ATTENTION: AnnotationReader n'est pas initialisé. Appelez init() au démarrage.");
+            init();
+        }
+        MappingInfo info = urlRegistry.findByUrl(url, httpMethod);
         return info != null ? info : new MappingInfo();
     }
     
     /**
      * Affiche les informations de mapping pour une URL donnée
-     * @param url L'URL à rechercher
      */
     public static void displayMappingForUrl(String url) {
         MappingInfo info = findMappingByUrl(url);

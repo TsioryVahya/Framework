@@ -36,8 +36,9 @@ public class FrontServlet extends HttpServlet {
 
         System.out.println("FrontServlet handling: " + urlPath);
 
-        // Find mapping for the URL
-        MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath);
+        // Find mapping for the URL (method-aware)
+        String httpMethod = req.getMethod();
+        MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath, httpMethod);
 
         resp.setContentType("text/html;charset=UTF-8");
 
