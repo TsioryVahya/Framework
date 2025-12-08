@@ -11,6 +11,7 @@ import framework.annotation.AnnotationReader;
 import framework.annotation.Param;
 import framework.utilitaire.MappingInfo;
 import framework.utilitaire.ModelAndView;
+import framework.utilitaire.RequestUtils;
 
 public class FrontServlet extends HttpServlet {
 
@@ -56,6 +57,10 @@ public class FrontServlet extends HttpServlet {
                     req.setAttribute(e.getKey(), e.getValue());
                 }
             }
+
+            // Build param map from request parameters and attach it
+            Map<String, Object> paramMap = RequestUtils.buildParamMap(req);
+            req.setAttribute("params", paramMap);
 
             Class<?> controllerClass = mapping.getControllerClass();
             Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
