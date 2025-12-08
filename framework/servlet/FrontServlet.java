@@ -9,9 +9,11 @@ import java.util.Map;
 
 import framework.annotation.AnnotationReader;
 import framework.annotation.Param;
+import framework.annotation.ModelAttribute;
 import framework.utilitaire.MappingInfo;
 import framework.utilitaire.ModelAndView;
 import framework.utilitaire.RequestUtils;
+import framework.utilitaire.ModelBinder;
 
 public class FrontServlet extends HttpServlet {
 
@@ -66,7 +68,7 @@ public class FrontServlet extends HttpServlet {
             Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
             Method method = mapping.getMethod();
 
-            // Build method arguments: support HttpServletRequest/HttpServletResponse
+            // Build method arguments: support HttpServletRequest/HttpServletResponse and @ModelAttribute binding
             Parameter[] params = method.getParameters();
             Object[] args = new Object[params.length];
             for (int i = 0; i < params.length; i++) {
@@ -75,6 +77,9 @@ public class FrontServlet extends HttpServlet {
                     args[i] = req;
                 } else if (HttpServletResponse.class.isAssignableFrom(pt)) {
                     args[i] = resp;
+                } else if (params[i].isAnnotationPresent(ModelAttribute.class)) {
+                    // Bind a complex object from request parameters
+                    args[i] = ModelBinder.bind(req, pt);
                 } else {
                     // Try to resolve using @Param annotation first
                     Param pAnn = params[i].getAnnotation(Param.class);
