@@ -10,10 +10,12 @@ import java.util.Map;
 import framework.annotation.AnnotationReader;
 import framework.annotation.Param;
 import framework.annotation.ModelAttribute;
+import framework.annotation.RestController;
 import framework.utilitaire.MappingInfo;
 import framework.utilitaire.ModelAndView;
 import framework.utilitaire.RequestUtils;
 import framework.utilitaire.ModelBinder;
+import framework.utilitaire.JsonUtils;
 
 public class FrontServlet extends HttpServlet {
 
@@ -43,6 +45,7 @@ public class FrontServlet extends HttpServlet {
         String httpMethod = req.getMethod();
         MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath, httpMethod);
 
+        // Default content type (may be overridden for REST)
         resp.setContentType("text/html;charset=UTF-8");
 
         if (mapping == null || !mapping.isFound()) {
@@ -60,11 +63,12 @@ public class FrontServlet extends HttpServlet {
                 }
             }
 
-            // Build param map from request parameters and attach it
+            
             Map<String, Object> paramMap = RequestUtils.buildParamMap(req);
             req.setAttribute("params", paramMap);
 
             Class<?> controllerClass = mapping.getControllerClass();
+            boolean isRest = controllerClass.isAnnotationPresent(RestController.class);
             Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
             Method method = mapping.getMethod();
 
@@ -123,8 +127,11 @@ public class FrontServlet extends HttpServlet {
 
             Object result = method.invoke(controllerInstance, args);
 
-            if (result instanceof String) {
-                resp.getWriter().write((String) result);
+            if (isRest) {
+                // Serialize to JSON
+                resp.setContentType("application/json;charset=UTF-8");
+                String json = JsonUtils.toJson(result);
+                resp.getWriter().write(json);
             } else if (result instanceof ModelAndView) {
                 ModelAndView mv = (ModelAndView) result;
                 // Set model attributes
@@ -137,6 +144,7 @@ public class FrontServlet extends HttpServlet {
             } else if (result == null) {
                 resp.getWriter().write("");
             } else {
+                // Default textual rendering
                 resp.getWriter().write(String.valueOf(result));
             }
         } catch (Exception e) {
