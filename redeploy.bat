@@ -28,6 +28,9 @@ javac -classpath "build\classes" -d "build\classes" framework\utilitaire\UrlMapp
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ModelAndView.java
 javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes" -d "build\classes" framework\utilitaire\RequestUtils.java framework\utilitaire\ModelBinder.java framework\utilitaire\JsonUtils.java
 
+REM Compiler les utilitaires d'upload (nécessaires pour FrontServlet et PhotoController)
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes" -d "build\classes" framework\utilitaire\UploadedFile.java framework\utilitaire\FileUploadUtils.java framework\utilitaire\FileStorageService.java
+
 REM Compiler le service principal qui dépend des utilitaires
 javac -classpath "build\classes" -d "build\classes" framework\annotation\AnnotationReader.java
 

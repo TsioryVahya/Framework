@@ -16,7 +16,11 @@ import framework.utilitaire.ModelAndView;
 import framework.utilitaire.RequestUtils;
 import framework.utilitaire.ModelBinder;
 import framework.utilitaire.JsonUtils;
+import framework.utilitaire.FileUploadUtils;
+import framework.utilitaire.UploadedFile;
+import jakarta.servlet.annotation.MultipartConfig;
 
+@MultipartConfig
 public class FrontServlet extends HttpServlet {
 
     @Override
@@ -55,6 +59,10 @@ public class FrontServlet extends HttpServlet {
         }
 
         try {
+            // Gestion multipart: si c'est une requête d'upload, on met les fichiers dans un attribut
+            if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("multipart/")) {
+                req.setAttribute("uploadedFiles", FileUploadUtils.getUploadedFiles(req));
+            }
             // Expose path variables (if any) as request attributes
             Map<String, String> vars = mapping.getLastPathVariables();
             if (vars != null) {
@@ -90,6 +98,16 @@ public class FrontServlet extends HttpServlet {
                     String raw = null;
                     if (pAnn != null) {
                         String paramName = pAnn.value();
+                        // Uploaded file binding support
+                        if (UploadedFile.class.isAssignableFrom(pt)) {
+                            Object mapObj = req.getAttribute("uploadedFiles");
+                            if (mapObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, UploadedFile> fMap = (Map<String, UploadedFile>) mapObj;
+                                args[i] = fMap.get(paramName);
+                                continue;
+                            }
+                        }
                         raw = req.getParameter(paramName);
                         if (raw == null) {
                             Object attr = req.getAttribute(paramName);
