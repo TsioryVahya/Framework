@@ -12,6 +12,8 @@ import framework.annotation.Param;
 import framework.annotation.ModelAttribute;
 import framework.annotation.RestController;
 import framework.annotation.Session;
+import framework.annotation.Authorized;
+import framework.annotation.Role;
 import framework.utilitaire.MappingInfo;
 import framework.utilitaire.ModelAndView;
 import framework.utilitaire.RequestUtils;
@@ -47,11 +49,11 @@ public class FrontServlet extends HttpServlet {
 
         System.out.println("FrontServlet handling: " + urlPath);
 
-        // Find mapping for the URL (method-aware)
+        
         String httpMethod = req.getMethod();
         MappingInfo mapping = AnnotationReader.findMappingByUrl(urlPath, httpMethod);
 
-        // Default content type (may be overridden for REST)
+        
         resp.setContentType("text/html;charset=UTF-8");
 
         if (mapping == null || !mapping.isFound()) {
@@ -61,11 +63,11 @@ public class FrontServlet extends HttpServlet {
         }
 
         try {
-            // Gestion multipart: si c'est une requête d'upload, on met les fichiers dans un attribut
+            
             if (req.getContentType() != null && req.getContentType().toLowerCase().startsWith("multipart/")) {
                 req.setAttribute("uploadedFiles", FileUploadUtils.getUploadedFiles(req));
             }
-            // Expose path variables (if any) as request attributes
+            
             Map<String, String> vars = mapping.getLastPathVariables();
             if (vars != null) {
                 for (Map.Entry<String, String> e : vars.entrySet()) {
@@ -81,6 +83,77 @@ public class FrontServlet extends HttpServlet {
             boolean isRest = controllerClass.isAnnotationPresent(RestController.class);
             Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
             Method method = mapping.getMethod();
+
+            
+            boolean requiresAuth = controllerClass.isAnnotationPresent(Authorized.class)
+                    || method.isAnnotationPresent(Authorized.class);
+            if (requiresAuth) {
+                String attrName = getServletContext().getInitParameter("auth.session.attribute");
+                if (attrName == null || attrName.isEmpty()) {
+                    attrName = "user"; 
+                }
+                HttpSession session = req.getSession(false);
+                Object marker = (session != null) ? session.getAttribute(attrName) : null;
+                boolean allowed = marker != null && (!(marker instanceof String) || !((String) marker).isEmpty());
+                if (!allowed) {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    resp.setContentType("text/html;charset=UTF-8");
+                    resp.getWriter().write("<h1>401 - Non autorisé</h1><p>Veuillez vous connecter.</p>");
+                    return;
+                }
+            }
+
+            
+            Role roleAnn = method.getAnnotation(Role.class);
+            if (roleAnn == null) {
+                roleAnn = controllerClass.getAnnotation(Role.class);
+            }
+            if (roleAnn != null) {
+                String roleAttr = getServletContext().getInitParameter("role.session.attribute");
+                if (roleAttr == null || roleAttr.isEmpty()) {
+                    roleAttr = "role"; // default
+                }
+                HttpSession session = req.getSession(false);
+                Object marker = (session != null) ? session.getAttribute(roleAttr) : null;
+
+                // Build a set of current roles from the session attribute
+                java.util.Set<String> currentRoles = new java.util.HashSet<>();
+                if (marker != null) {
+                    if (marker instanceof String) {
+                        String s = ((String) marker).trim();
+                        if (!s.isEmpty()) {
+                            // Support comma-separated roles in a single String
+                            for (String part : s.split(",")) {
+                                String role = part.trim();
+                                if (!role.isEmpty()) currentRoles.add(role.toLowerCase());
+                            }
+                        }
+                    } else if (marker.getClass().isArray()) {
+                        int len = java.lang.reflect.Array.getLength(marker);
+                        for (int i = 0; i < len; i++) {
+                            Object el = java.lang.reflect.Array.get(marker, i);
+                            if (el != null) currentRoles.add(String.valueOf(el).toLowerCase());
+                        }
+                    } else if (marker instanceof java.util.Collection<?>) {
+                        for (Object el : (java.util.Collection<?>) marker) {
+                            if (el != null) currentRoles.add(String.valueOf(el).toLowerCase());
+                        }
+                    } else {
+                        currentRoles.add(String.valueOf(marker).toLowerCase());
+                    }
+                }
+
+                boolean ok = false;
+                for (String r : roleAnn.value()) {
+                    if (r != null && currentRoles.contains(r.toLowerCase())) { ok = true; break; }
+                }
+                if (!ok) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    resp.setContentType("text/html;charset=UTF-8");
+                    resp.getWriter().write("<h1>403 - Accès interdit</h1><p>Rôle requis: " + String.join(", ", roleAnn.value()) + "</p>");
+                    return;
+                }
+            }
 
             // Build method arguments: support HttpServletRequest/HttpServletResponse and @ModelAttribute binding
             Parameter[] params = method.getParameters();
