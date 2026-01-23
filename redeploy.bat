@@ -17,7 +17,7 @@ REM Étape 3: Compilation
 echo 3. Compilation des sources du framework...
 
 REM Compiler les annotations de base
-javac -d "build\classes" framework\annotation\Controller.java framework\annotation\GetMapping.java framework\annotation\Param.java framework\annotation\PostMapping.java framework\annotation\SimpleMapping.java framework\annotation\ModelAttribute.java framework\annotation\RestController.java
+javac -d "build\classes" framework\annotation\Controller.java framework\annotation\GetMapping.java framework\annotation\Param.java framework\annotation\PostMapping.java framework\annotation\SimpleMapping.java framework\annotation\ModelAttribute.java framework\annotation\RestController.java framework\annotation\Session.java
 
 REM Compiler les classes utilitaires (nouveau package framework\utilitaire)
 REM IMPORTANT: compiler MappingInfo AVANT UrlMappingRegistry
@@ -26,7 +26,7 @@ javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ConfigL
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ClassScanner.java
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\UrlMappingRegistry.java
 javac -classpath "build\classes" -d "build\classes" framework\utilitaire\ModelAndView.java
-javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes" -d "build\classes" framework\utilitaire\RequestUtils.java framework\utilitaire\ModelBinder.java framework\utilitaire\JsonUtils.java
+javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes" -d "build\classes" framework\utilitaire\RequestUtils.java framework\utilitaire\ModelBinder.java framework\utilitaire\JsonUtils.java framework\utilitaire\SessionMap.java
 
 REM Compiler les utilitaires d'upload (nécessaires pour FrontServlet et PhotoController)
 javac -classpath "jakarta.servlet-api_5.0.0.jar;build\classes" -d "build\classes" framework\utilitaire\UploadedFile.java framework\utilitaire\FileUploadUtils.java framework\utilitaire\FileStorageService.java
