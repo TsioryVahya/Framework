@@ -11,6 +11,7 @@ import framework.annotation.AnnotationReader;
 import framework.annotation.Param;
 import framework.annotation.ModelAttribute;
 import framework.annotation.RestController;
+import framework.annotation.Session;
 import framework.utilitaire.MappingInfo;
 import framework.utilitaire.ModelAndView;
 import framework.utilitaire.RequestUtils;
@@ -18,6 +19,7 @@ import framework.utilitaire.ModelBinder;
 import framework.utilitaire.JsonUtils;
 import framework.utilitaire.FileUploadUtils;
 import framework.utilitaire.UploadedFile;
+import framework.utilitaire.SessionMap;
 import jakarta.servlet.annotation.MultipartConfig;
 
 @MultipartConfig
@@ -89,6 +91,11 @@ public class FrontServlet extends HttpServlet {
                     args[i] = req;
                 } else if (HttpServletResponse.class.isAssignableFrom(pt)) {
                     args[i] = resp;
+                } else if (params[i].isAnnotationPresent(Session.class)) {
+                    if (Map.class.isAssignableFrom(pt)) {
+                        args[i] = new SessionMap(req.getSession());
+                        continue;
+                    }
                 } else if (params[i].isAnnotationPresent(ModelAttribute.class)) {
                     // Bind a complex object from request parameters
                     args[i] = ModelBinder.bind(req, pt);
@@ -207,4 +214,3 @@ public class FrontServlet extends HttpServlet {
         return null;
     }
 }
-
